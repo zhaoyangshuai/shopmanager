@@ -9,7 +9,7 @@
           <h2 class="middle">电商后台管理系统</h2>
         </el-col>
         <el-col :span="1">
-          <a href class="loginout">退出</a>
+          <a href class="loginout" @click.prevent="handleSignout()">退出</a>
         </el-col>
       </el-row>
     </el-header>
@@ -97,7 +97,34 @@
 </template>
 
 <script>
-export default {};
+export default {
+  //完成退出功能，也就是点击 退出之后，清楚在浏览器端存储的token值，然后返回登录页面
+  data() {
+    return {};
+  },
+  methods: {
+    handleSignout() {
+      //点击之后清楚存储的值
+      localStorage.clear();
+      //路由编程导航
+      this.$router.push({
+        name: "login"
+      });
+      //提示退出成功
+      this.$message.success("退出成功");
+    }
+  },
+  //进入首页的权限验证，必须先登录，才可以进入到首页
+  beforeCreate() {
+    if (!localStorage.getItem("token")) {
+      //   如果找不到里面存的token值，那么就直接跳转到登录页，提示，请先登录
+      this.$router.push({
+        name: "login"
+      });
+      this.$message.warning("请先登录");
+    }
+  }
+};
 </script>
 
 <style>
