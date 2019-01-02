@@ -15,7 +15,7 @@
     </el-header>
     <el-container>
       <el-aside class="aside" width="200px">
-        <el-menu default-active="2" :unique-opened="true">
+        <el-menu default-active="2" :unique-opened="true" router>
           <!-- 1 -->
           <el-submenu index="1">
             <template slot="title">
@@ -23,7 +23,7 @@
               <span>用户管理</span>
             </template>
 
-            <el-menu-item index="1-1">
+            <el-menu-item index="users">
               <i class="el-icon-location"></i>
               用户列表
             </el-menu-item>
@@ -91,7 +91,9 @@
           </el-submenu>
         </el-menu>
       </el-aside>
-      <el-main class="main">Main</el-main>
+      <el-main class="main">
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -124,6 +126,12 @@ export default {
       this.$message.warning("请先登录");
     }
   }
+  //建立新的路由配置：功能目标：点击相应的导航，就在右侧main渲染出应该出现的页面
+  //   1）提供标签  显示标签
+  //   2）写新的组件
+  //   3）配置路由
+  //   4）实例化路由
+  //   5.挂载路由
 };
 </script>
 
