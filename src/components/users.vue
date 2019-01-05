@@ -54,7 +54,14 @@
               @click="showeditUser(scope.row)"
               circle
             ></el-button>
-            <el-button plain type="success" size="mini" icon="el-icon-check" circle></el-button>
+            <el-button
+              plain
+              type="success"
+              @click="showRole(scope.row)"
+              size="mini"
+              icon="el-icon-check"
+              circle
+            ></el-button>
             <el-button
               plain
               @click="delUser(scope.row)"
@@ -121,6 +128,25 @@
         <el-button type="primary" @click="editUser">确 定</el-button>
       </div>
     </el-dialog>
+
+    <!-- 显示对应的角色 -->
+    <el-dialog title="分配角色" :visible.sync="dialogFormVisibleRole">
+      <el-form :model="form">
+        <el-form-item label="用户名" :label-width="formLabelWidth">{{currUserName}}</el-form-item>
+        <el-form-item label="角色" :label-width="formLabelWidth">
+          <el-select v-model="currUserRoleId">
+            <!-- 请选择 -->
+            <el-option disabled label="请选择" :value="-1"></el-option>
+            <!-- v-for遍历 -->
+            <el-option v-for="(v,i) in roles" :key="i" :label="v.roleName" :value="v.id"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisibleRole = false">取 消</el-button>
+        <el-button type="primary" @click="setRole">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
   <!-- id:  id
         username:  用户名
@@ -143,13 +169,19 @@ export default {
       dialogTableVisible: false,
       dialogFormVisibleAdd: false,
       dialogFormVisibleEdit: false,
+      dialogFormVisibleRole: false,
       form: {
         username: "",
         password: "",
         email: "",
         mobile: ""
       },
-      formLabelWidth: "120px"
+      formLabelWidth: "120px",
+      //下拉框绑定的数据：
+      currUserRoleId: -1,
+      roles: [],
+      currUserName: "",
+      currUserId: -1
     };
   },
   created() {
@@ -304,6 +336,44 @@ export default {
         `users/${user.id}/state/${user.mg_state}`
       );
       console.log(res);
+    },
+    //点击对勾之后出现弹出框，弹出框显示的是当前用户的信息两个部分，分别是用户名和他的角色信息
+    async showRole(user) {
+      //获取当前用户的id值，从数据库中传过来
+      this.currUserId = user.id;
+      //获取当前角色的名字，从tabledata数据库中传过来
+      this.currUserName = user.username;
+      //获取所有角色的角色名字
+      const res = await this.$http.get(`roles`);
+      console.log(res);
+      this.roles = res.data.data;
+      //当来到页面的时候，就显示出对应的角色名称  控制v-model
+      //根据当前用户的id查询他的角色id
+      const res2 = await this.$http.get(`users/${user.id}`);
+      // console.log(res2);
+      this.currUserRoleId = res2.data.data.rid;
+      // console.log(this.roles);
+      this.dialogFormVisibleRole = true;
+    },
+    //点击确定按钮，发送请求，更改此时的角色类别
+    async setRole() {
+      //从查文档得知，这里主要需要另两个参数，一个是用户的id 一个是角色的id
+      // 用户的id：user.id = this.currUserId
+      // 角色的id：也就是v-model上边绑定的id，当前选中的id
+      //发送请求，重新分配角色
+      const res = await this.$http.put(`users/${this.currUserId}/role`, {
+        rid: this.currUserRoleId
+      });
+      console.log(res);
+      const {
+        data: {
+          meta: { status, msg }
+        }
+      } = res;
+      if (status === 200) {
+        this.dialogFormVisibleRole = false;
+        this.$message.success(msg);
+      }
     }
   }
 };
