@@ -7,8 +7,13 @@ import Http from './plugins/http'
 import App from './App'
 import router from './router'
 import '@/assets/index.css'
+import Moment from 'moment'
 Vue.use(ElementUI);
 Vue.config.productionTip = false
+//处理日期格式
+Vue.filter('fmtData', (v) => {
+  return Moment(v).format('YYYY-MM-DD')
+})
 Vue.use(Http)
 /* eslint-disable no-new */
 new Vue({
